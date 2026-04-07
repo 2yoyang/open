@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!-- 声明HTML5文档类型，浏览器按最新标准解析 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 统一字符编码，避免中文乱码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 适配移动端/PC端屏幕 -->
+    <title>文字交互+视频播放页面</title>
+    <style>
+        /* 全局样式重置：清除默认边距，保证全屏无留白 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 页面基础样式：全白背景、全屏高度、溢出隐藏 */
+        body {
+            background-color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            font-family: "Arial", sans-serif;
+            position: relative;
+            transition: background-color 0s;
+        }
+
+        /* 文字容器 */
+        #text-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #000000;
+            opacity: 0;
+            filter: blur(1px);
+            transition: opacity 1s ease; /* 渐变消失动画 */
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 视频容器 */
+        #video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            z-index: 20;
+            background: #000;
+        }
+
+        /* 视频样式 */
+        #fullscreen-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        /* 黑屏样式 */
+        .black-screen {
+            background-color: #000000 !important;
+        }
+
+        /* 全白屏样式 */
+        .white-screen {
+            background-color: #ffffff !important;
+        }
+
+        /* 禁用页面交互 */
+        .disable-interaction {
+            pointer-events: none !important;
+        }
+    </style>
+</head>
+<body id="page-body" class="white-screen disable-interaction">
+    <div id="text-container"></div>
+    
+    <div id="video-container">
+        <video id="fullscreen-video" autoplay muted playsinline>
+            <source src="glitch.mp4" type="video/mp4">
+            你的浏览器不支持HTML5视频播放,请更换浏览器重试。
+        </video>
+    </div>
+
+    <script>
+        // 核心变量
+        const textContainer = document.getElementById('text-container');
+        const body = document.getElementById('page-body');
+        const videoContainer = document.getElementById('video-container');
+        const fullscreenVideo = document.getElementById('fullscreen-video');
+        let clickStage = 0;
+        let isClickDisabled = false;
+
+        // 文字内容配置
+        const textConfig = {
+            initialText: "你不知道？",
+            text1: "好吧",
+            text2: "但是...",
+            text3: "我曾见过你。",
+            text4: "你不记得了？",
+            text5: ".................",
+            finalPage: "haveyouseenthisperson.html"
+        };
+
+        // 时长配置
+        const timeConfig = {
+            initialBlank: 5000,     // 初始5秒白屏
+            fadeTime: 1000,         // 文字渐变消失时间
+            blankTime1: 1000,
+            blankTime2: 2000,
+            text4Duration: 6000,    // 你不记得了？显示6秒
+            text5Duration: 5000     // .................显示5秒
+        };
+
+        // 显示文字
+        function showText(text) {
+            textContainer.textContent = text;
+            textContainer.style.opacity = 1;
+        }
+
+        // 渐变隐藏文字（平滑消失）
+        function hideTextFade() {
+            textContainer.style.opacity = 0;
+            // 等待渐变完成后清空文字
+            setTimeout(() => {
+                textContainer.textContent = "";
+            }, timeConfig.fadeTime);
+        }
+
+        // 初始化
+        window.onload = function() {
+            // 第一步：等待5秒全白屏 + 无交互
+            setTimeout(() => {
+                body.classList.remove('disable-interaction');
+                showText(textConfig.initialText);
+                
+                // 2秒后允许点击
+                setTimeout(()=>{
+                    isClickDisabled = false;
+                },2000)
+
+            }, timeConfig.initialBlank);
+
+            // 视频结束逻辑
+            fullscreenVideo.addEventListener('ended', function() {
+                videoContainer.style.display = 'none';
+                body.classList.remove('white-screen');
+                body.classList.add('black-screen');
+                body.classList.remove('disable-interaction'); // 开启点击
+                clickStage = 4; // 设置为可跳转阶段
+                isClickDisabled = false; // ✅ 修复：必须解锁点击开关
+            });
+        };
+
+        // 点击事件
+        body.addEventListener('click', function() {
+            if (isClickDisabled) return;
+
+            // 阶段0：你不知道？→ 渐变消失
+            if (clickStage === 0) {
+                hideTextFade();
+                clickStage = 1;
+                setTimeout(() => {
+                    showText(textConfig.text1);
+                }, timeConfig.fadeTime);
+                return;
+            }
+
+            // 阶段1：好吧→但是...→我曾见过你（全部渐变消失）
+            if (clickStage === 1) {
+                const current = textContainer.textContent;
+                hideTextFade();
+                
+                if (current === textConfig.text1) {
+                    setTimeout(()=>showText(textConfig.text2), timeConfig.fadeTime);
+                } else if (current === textConfig.text2) {
+                    setTimeout(()=>showText(textConfig.text3), timeConfig.fadeTime);
+                } else if (current === textConfig.text3) {
+                    clickStage = 2;
+                    setTimeout(() => {
+                        showText(textConfig.text4);
+                        
+                        // 你不记得了？显示6秒，期间完全禁止交互
+                        isClickDisabled = true;
+                        body.classList.add('disable-interaction');
+
+                        // 6秒后恢复交互，允许点击
+                        setTimeout(()=>{
+                            isClickDisabled = false;
+                            body.classList.remove('disable-interaction');
+                        }, timeConfig.text4Duration);
+
+                    }, timeConfig.blankTime2);
+                }
+                return;
+            }
+
+            // 阶段2：你不记得了？→【点击无效果，直接立刻切换】.................
+            if (clickStage === 2) {
+                if(textContainer.textContent === textConfig.text4){
+                    // ✅ 这里修改：立刻直接替换，无渐变、无等待
+                    showText(textConfig.text5);
+                    
+                    isClickDisabled = true;
+
+                    // 5秒后自动播放视频
+                    setTimeout(()=>{
+                        hideTextFade();
+                        clickStage = 3;
+                        body.classList.add('disable-interaction');
+                        
+                        setTimeout(() => {
+                            videoContainer.style.display = 'block';
+                            fullscreenVideo.play();
+                        }, timeConfig.fadeTime);
+                        
+                    }, timeConfig.text5Duration);
+                }
+                return;
+            }
+
+            // 阶段3：视频播放中，不处理点击
+            if (clickStage === 3) {
+                return;
+            }
+
+            // 阶段4：黑屏点击跳转
+            if (clickStage === 4) {
+                window.location.href = textConfig.finalPage;
+            }
+        });
+    </script>
+</body>
