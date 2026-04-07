@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义按钮页面</title>
+    <style>
+        /* ===================== 全局样式 & 背景设置 ===================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* ==============================================
+               🎯 【背景图片替换位置】
+               把 url() 里的内容换成你的图片路径即可！
+               本地图片：直接写文件名（和HTML同文件夹），比如 url("bg.jpg")
+               网络图片：直接填完整链接，比如 url("https://xxx.com/your-image.jpg")
+               ============================================== */
+            background: url("image/2.jpg") no-repeat center center fixed;
+            background-size: cover; /* 保持图片比例铺满屏幕，无需修改 */
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===================== 按钮通用样式（全 px 单位） ===================== */
+        .text-btn {
+            position: absolute;
+            font-family: Arial, sans-serif;
+            font-size: 60px;     /* 【统一字体大小】可改px */
+            font-weight: bold;
+            color: #000;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            /* 字体模糊效果（px），数值越大越模糊 */
+            filter: blur(2px);
+            -webkit-filter: blur(2px);
+            transition: 0.2s;
+            z-index: 10;
+        }
+
+        /* 鼠标悬浮效果（可选，可删除） */
+        .text-btn:hover {
+            filter: blur(1px);
+            transform: scale(1.02);
+        }
+
+        /* ===================== 按钮 1：who？ ===================== */
+        .btn-1 {
+            top: 730px;     /* 距离顶部 px，改数字移动 */
+            left: 990px;   /* 距离左侧 px，改数字移动 */
+            font-size: 36px; /* 单独控制按钮1大小 */
+        }
+
+        /* ===================== 按钮 2：test ===================== */
+        .btn-2 {
+            top: 230px;    /* 距离顶部 px */
+            left: 450px;   /* 距离左侧 px */
+            font-size: 45px; /* 单独控制按钮2大小 */
+        }
+
+        /* ===================== 按钮 3：logs ===================== */
+        .btn-3 {
+            top: 476px;    /* 距离顶部 px */
+            left: 1488px;   /* 距离左侧 px */
+            font-size: 40px; /* 单独控制按钮3大小 */
+        }
+    </style>
+</head>
+<body>
+
+<!-- 按钮1：who？ -->
+<button class="text-btn btn-1" onclick="window.location.href='page1.html'">
+    who？
+</button>
+
+<!-- 按钮2：test -->
+<button class="text-btn btn-2" onclick="window.location.href='page2.html'">
+    test
+</button>
+
+<!-- 按钮3：logs -->
+<button class="text-btn btn-3" onclick="window.location.href='page3.html'">
+    logs
+</button>
+
+</body>
+</html>
